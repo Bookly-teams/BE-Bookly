@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BagianController;
+use App\Http\Controllers\BukuController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,12 +18,24 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/buku', [BukuController::class, 'index']);
+    Route::post('/buku', [BukuController::class, 'store']);
+    Route::get('/buku/{id}', [BukuController::class, 'show']);
+    Route::put('/buku/{buku}', [BukuController::class, 'update']);
+    Route::delete('/buku/{buku}', [BukuController::class, 'destroy']);
+
+    Route::get('/buku/{buku_id}/bagian', [BagianController::class, 'index']);
+    Route::post('/buku/{buku_id}/bagian', [BagianController::class, 'store']);
+    Route::get('/bagian/{id}', [BagianController::class, 'show']);
+    Route::put('/buku/{buku_id}/bagian/{bagian_id}', [BagianController::class, 'update']);
+    Route::delete('/buku/{buku_id}/bagian/{bagian}', [BagianController::class, 'destroy']);
 });
 
-Route::get('/test',  function() {
-    return response([
-        'message' => 'API is working'
-    ], 200);
-});
+Route::post('user/{id}/update-profile', [AuthController::class, 'updateProfile']);
