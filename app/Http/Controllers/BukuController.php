@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Buku;
+use App\Models\Bagian; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class BukuController extends Controller
 {
@@ -13,12 +15,31 @@ class BukuController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        return response()->json([
-            'bukus' => Buku::orderBy('created_at', 'desc')->get() // Mengurutkan berdasarkan created_at secara descending
-        ], 200);
-    }
+{
+    // Ambil data dari model Bagian dengan relasi buku dan user
+    $bagian = Bagian::with(['buku' => function($query) {
+        $query->select('id', 'cover', 'judul', 'deskripsi', 'user_id')
+              ->with(['user' => function($query) {
+                  $query->select('id', 'nama_pengguna');
+              }]);
+    }])
+    ->select('buku_id', DB::raw('COUNT(*) as total_bagian'))
+    ->groupBy('buku_id')
+    ->get()
+    ->map(function($item) {
+        return [
+            'cover' => $item->buku->cover,
+            'judul' => $item->buku->judul,
+            'deskripsi' => $item->buku->deskripsi,
+            'nama_pengguna' => $item->buku->user->nama_pengguna,
+            'total_bagian' => $item->total_bagian
+        ];
+    });
 
+    return response()->json([
+        'bagian' => $bagian
+    ], 200);
+}
     /**
      * Show the form for creating a new resource.
      */
