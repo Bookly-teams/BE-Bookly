@@ -65,7 +65,6 @@ class AuthController extends Controller
             'user' => auth()->user()
         ], 200);
     }
-
     // Fungsi untuk mengupdate profil pengguna
     public function updateProfile(Request $request, $id)
     {
