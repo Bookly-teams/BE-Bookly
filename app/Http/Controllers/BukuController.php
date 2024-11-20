@@ -38,8 +38,7 @@ class BukuController extends Controller
             'deskripsi' => 'required|max:255|string',
         ]);
 
-        if ($request->file('cover'))
-        {
+        if ($request->file('cover')) {
             $validatedData['cover'] = $request->file('cover')->store('cover');
         }
 
@@ -80,15 +79,13 @@ class BukuController extends Controller
     {
         $buku = Buku::find($id);
 
-        if (!$buku)
-        {
+        if (!$buku) {
             return response([
                 'message' => 'Buku tidak ditemukan'
             ], 403);
         }
 
-        if($buku->user_id != auth()->user()->id)
-        {
+        if ($buku->user_id != auth()->user()->id) {
             return response([
                 'message' => 'Anda tidak berhak mengubah buku ini'
             ], 403);
@@ -102,8 +99,7 @@ class BukuController extends Controller
 
         $validatedData = $request->validate($firstData);
 
-        if ($request->file('cover'))
-        {
+        if ($request->file('cover')) {
             Storage::delete($buku->cover);
             $validatedData['cover'] = $request->file('cover')->store('covers');
         }
@@ -112,7 +108,25 @@ class BukuController extends Controller
             'message' => 'Buku berhasil diupdate',
             'buku' => Buku::where('id', $buku->id)->update($validatedData),
         ], 200);
+    }
 
+    public function search(Request $request)
+    {
+        $searchTerm = $request->get('q');
+
+        if (!$searchTerm) {
+            return response()->json([
+                'message' => 'Harap masukkan kata kunci pencarian',
+            ], 400);
+        }
+
+        $searchResults = Buku::where('judul', 'like', "%{$searchTerm}%")
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'bukus' => $searchResults,
+        ], 200);
     }
 
     /**
