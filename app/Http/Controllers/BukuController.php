@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bagian;
 use App\Models\Buku;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,11 +15,26 @@ class BukuController extends Controller
      */
     public function index()
     {
+        // Ambil data dari model Buku dengan relasi bagian dan user
+        $buku = Buku::with(['bagian', 'user' => function ($query) {
+            $query->select('id', 'nama_pengguna');
+        }])
+            ->select('id', 'cover', 'judul', 'deskripsi', 'user_id')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'cover' => $item->cover,
+                    'judul' => $item->judul,
+                    'deskripsi' => $item->deskripsi,
+                    'nama_pengguna' => $item->user->nama_pengguna,
+                    'total_bagian' => $item->bagian->count(),
+                ];
+            });
+
         return response()->json([
-            'bukus' => Buku::orderBy('created_at', 'desc')->get() // Mengurutkan berdasarkan created_at secara descending
+            'bagian' => $buku,
         ], 200);
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -35,7 +51,7 @@ class BukuController extends Controller
         $validatedData = $request->validate([
             'cover' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'judul' => 'required|max:255|string',
-            'deskripsi' => 'required|max:255|string',
+            'deskripsi' => 'required|string',
         ]);
 
         if ($request->file('cover')) {
@@ -53,17 +69,6 @@ class BukuController extends Controller
     /**
      * Display the specified resource.
      */
-    /**public function show(Buku $buku)
-    {
-        // Ambil semua bagian yang terkait dengan buku ini
-        $bagian = $buku->bagian; // Asumsi bahwa relasi sudah didefinisikan di model Buku
-
-        return response()->json([
-            'buku' => $buku,
-            'bagian' => $bagian
-        ], 200);
-    }*/
-    
     public function show(Buku $buku)
     {
         if (!$buku->id) {
@@ -113,32 +118,51 @@ class BukuController extends Controller
 
         if (!$buku) {
             return response([
-                'message' => 'Buku tidak ditemukan'
+                'message' => 'Buku tidak ditemukan',
             ], 403);
         }
 
         if ($buku->user_id != auth()->user()->id) {
             return response([
-                'message' => 'Anda tidak berhak mengubah buku ini'
+                'message' => 'Anda tidak berhak mengubah buku ini',
             ], 403);
         }
 
         $firstData = [
-            'cover' => 'image|file|max:2048',
-            'judul' => 'required|max:255|string',
-            'deskripsi' => 'required|max:255|string',
+            'cover' => 'required|image|file|max:2048',
+            'judul' => 'max:255|string',
+            'deskripsi' => 'max:255|string',
         ];
 
         $validatedData = $request->validate($firstData);
 
         if ($request->file('cover')) {
             Storage::delete($buku->cover);
-            $validatedData['cover'] = $request->file('cover')->store('covers');
+            $validatedData['cover'] = $request->file('cover')->store('cover');
         }
 
         return response([
             'message' => 'Buku berhasil diupdate',
             'buku' => Buku::where('id', $buku->id)->update($validatedData),
+        ], 200);
+    }
+
+    public function search(Request $request)
+    {
+        $searchTerm = $request->get('q');
+
+        if (!$searchTerm) {
+            return response()->json([
+                'message' => 'Harap masukkan kata kunci pencarian',
+            ], 400);
+        }
+
+        $searchResults = Buku::where('judul', 'like', "%{$searchTerm}%")
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'bukus' => $searchResults,
         ], 200);
     }
 
@@ -153,14 +177,14 @@ class BukuController extends Controller
         // Cek apakah buku ada
         if (!$book) {
             return response()->json([
-                'message' => 'Buku tidak ditemukan'
+                'message' => 'Buku tidak ditemukan',
             ], 404); // Mengubah status code menjadi 404 Not Found
         }
 
         // Cek apakah user yang sedang login adalah pemilik buku
         if ($book->user_id != auth()->user()->id) {
             return response()->json([
-                'message' => 'Anda tidak berhak mengubah buku ini'
+                'message' => 'Anda tidak berhak mengubah buku ini',
             ], 403);
         }
 
@@ -175,6 +199,36 @@ class BukuController extends Controller
 
         return response()->json([
             'message' => 'Buku berhasil dihapus',
+        ], 200);
+    }
+
+    public function baca($bukuId, $bagianId)
+    {
+        // Ambil buku berdasarkan ID
+        $buku = Buku::find($bukuId);
+
+        // Cek apakah buku ditemukan
+        if (!$buku) {
+            return response()->json([
+                'message' => 'Buku tidak ditemukan',
+            ], 404);
+        }
+
+        // Ambil bagian berdasarkan ID dan pastikan bagian tersebut terkait dengan buku
+        $bagian = $buku->bagian()->find($bagianId);
+
+        // Cek apakah bagian ditemukan
+        if (!$bagian) {
+            return response()->json([
+                'message' => 'Bagian tidak ditemukan',
+            ], 404);
+        }
+
+        // Kembalikan respons dengan judul buku, judul bagian, dan isi bagian
+        return response()->json([
+            'judul_buku' => $buku->judul,
+            'judul_bagian' => $bagian->judul_bagian,
+            'isi' => $bagian->isi, // Pastikan 'isi' adalah nama kolom di tabel Bagian
         ], 200);
     }
 }
