@@ -49,7 +49,7 @@ class BukuController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'cover' => 'required|file|max:2048',
+            'cover' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'judul' => 'required|max:255|string',
             'deskripsi' => 'required|string',
         ]);
@@ -69,28 +69,34 @@ class BukuController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(Buku $buku)
     {
-        // Ambil buku berdasarkan ID
-        $buku = Buku::with('bagian')->find($id);
-
-        // Cek apakah buku ditemukan
-        if (!$buku) {
+        if (!$buku->id) {
             return response()->json([
-                'message' => 'Buku tidak ditemukan',
-            ], 404);
+                'message' => 'Buku tidak valid'
+            ], 400);
         }
-
-        // Ambil semua bagian yang terkait dengan buku ini dengan judul bagian dan tanggal publikasi
-        $bagian = $buku->bagian->map(function ($item) {
-            return [
-                'judul_bagian' => $item->judul_bagian,
-                'tanggal_publikasi' => $item->tanggal_publikasi,
-            ];
-        });
-
+        // Pastikan user sudah login
+        $user = auth()->user();
+    
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+    
+        // Tambahkan buku_id dan user_id ke dalam model Perpustakaan
+        \App\Models\Perpustakaan::create([
+            'buku_id' => $buku->id,
+            'user_id' => $user->id, // Tambahkan user_id dari user yang login
+            // Tambahkan kolom lain jika diperlukan
+        ]);
+    
+        // Ambil semua bagian yang terkait dengan buku ini
+        $bagian = $buku->bagian;
+    
         return response()->json([
-            'judul_buku' => $buku->judul ?? 'Judul Tidak Tersedia',
+            'buku' => $buku,
             'bagian' => $bagian,
         ], 200);
     }

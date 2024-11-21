@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BagianController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\PerpustakaanController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,7 +21,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+//Route::get('/perpustakaan', [PerpustakaanController::class, 'index']);
+Route::post('/buku/{id}/add-to-library', [BukuController::class, 'addToLibrary']);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::get('/perpustakaan', [PerpustakaanController::class, 'index']);
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('user/{id}/update-profile', [AuthController::class, 'updateProfile']);
@@ -28,6 +34,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/buku', [BukuController::class, 'store']);
     Route::get('/buku/{id}', [BukuController::class, 'show']);
     Route::post('/buku/{buku}', [BukuController::class, 'update']);
+    Route::get('/buku/{buku}', [BukuController::class, 'show']);
+    Route::put('/buku/{buku}', [BukuController::class, 'update']);
     Route::delete('/buku/{buku}', [BukuController::class, 'destroy']);
     Route::get('/buku/{buku_id}/bagian/{id_bagian}/baca', [BukuController::class, 'baca']);
 
