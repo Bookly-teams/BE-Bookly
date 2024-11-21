@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Perpustakaan;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Buku;
 
 class PerpustakaanController extends Controller
 {
@@ -12,44 +11,22 @@ class PerpustakaanController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
+        // Mengambil ID user dari request
+        $userId = auth()->id();
 
-        // Cek apakah user ada
-        if (!$user) {
-            return response()->json([
-                'error' => 'Pengguna tidak terautentikasi'
-            ], 401);
-        }
+        // Mengambil semua buku yang telah dibaca oleh user, diurutkan berdasarkan waktu terakhir dibaca
+        $books = Buku::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get(['judul', 'cover']);
 
-        // Ambil data perpustakaan milik user dengan relasi buku
-        $perpustakaan = Perpustakaan::where('user_id', $user->id)
-            ->with('buku') // Pastikan relasi 'buku' ada di model
-            ->get();
+        // Menghitung total histori yang telah dibaca oleh user
+        $totalReadHistory = $books->count();
 
-        // Transformasi data perpustakaan untuk direspons
-        $perpustakaanData = $perpustakaan->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'buku_id' => $item->buku_id,
-                'judul' => optional($item->buku)->judul ?? 'Judul Tidak Tersedia',
-                'cover' => optional($item->buku)->cover
-                    ? url('storage/' . $item->buku->cover)
-                    : 'Cover Tidak Tersedia',
-            ];
-        });
-
-        // Jika tidak ada data
-        if ($perpustakaanData->isEmpty()) {
-            return response()->json([
-                'message' => 'Tidak ada buku di perpustakaan',
-                'total_buku' => 0,
-                'perpustakaan' => []
-            ]);
-        }
-
-        return response()->json([
-            'total_buku' => $perpustakaanData->count(),
-            'perpustakaan' => $perpustakaanData
-        ]);
+        // Mengembalikan response dengan data buku dan total histori
+        return response([
+            'message' => 'Data buku berhasil diambil',
+            'data' => $books,
+            'total_read_history' => $totalReadHistory,
+        ], 200);
     }
 }

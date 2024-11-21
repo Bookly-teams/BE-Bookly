@@ -72,13 +72,16 @@ class BukuController extends Controller
      */
     public function show($id)
     {
-        $buku = Buku::find($id);
+        $buku = Buku::with(['bagian' => function ($query) {
+            $query->select('id', 'buku_id', 'judul_bagian', 'tanggal_publikasi');
+        }])->find($id);
 
-        if (!$buku->id) {
+        if (!$buku) {
             return response()->json([
                 'message' => 'Buku tidak valid',
             ], 400);
         }
+
         // Pastikan user sudah login
         $user = auth()->user();
 
@@ -91,17 +94,24 @@ class BukuController extends Controller
         // Tambahkan buku_id dan user_id ke dalam model Perpustakaan
         Perpustakaan::create([
             'buku_id' => $buku->id,
-            'user_id' => $user->id, // Tambahkan user_id dari user yang login
-            // Tambahkan kolom lain jika diperlukan
+            'user_id' => $user->id,
         ]);
 
-        // Ambil semua bagian yang terkait dengan buku ini
-        $bagian = $buku->bagian;
+        // Format data untuk respons
+        $response = [
+            'buku' => [
+                'cover' => $buku->cover,
+                'judul' => $buku->judul,
+                'bagian' => $buku->bagian->map(function ($bagian) {
+                    return [
+                        'judul_bagian' => $bagian->judul_bagian,
+                        'tanggal_publikasi' => $bagian->tanggal_publikasi,
+                    ];
+                }),
+            ],
+        ];
 
-        return response()->json([
-            'buku' => $buku,
-            'bagian' => $bagian,
-        ], 200);
+        return response()->json($response, 200);
     }
 
     /**
