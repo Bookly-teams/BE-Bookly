@@ -33,13 +33,12 @@ class BukuController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'cover' => 'required|file|max:2048',
+            'cover' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'judul' => 'required|max:255|string',
             'deskripsi' => 'required|max:255|string',
         ]);
 
-        if ($request->file('cover'))
-        {
+        if ($request->file('cover')) {
             $validatedData['cover'] = $request->file('cover')->store('cover');
         }
 
@@ -54,7 +53,7 @@ class BukuController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Buku $buku)
+    /**public function show(Buku $buku)
     {
         // Ambil semua bagian yang terkait dengan buku ini
         $bagian = $buku->bagian; // Asumsi bahwa relasi sudah didefinisikan di model Buku
@@ -62,6 +61,38 @@ class BukuController extends Controller
         return response()->json([
             'buku' => $buku,
             'bagian' => $bagian
+        ], 200);
+    }*/
+    
+    public function show(Buku $buku)
+    {
+        if (!$buku->id) {
+            return response()->json([
+                'message' => 'Buku tidak valid'
+            ], 400);
+        }
+        // Pastikan user sudah login
+        $user = auth()->user();
+    
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 401);
+        }
+    
+        // Tambahkan buku_id dan user_id ke dalam model Perpustakaan
+        \App\Models\Perpustakaan::create([
+            'buku_id' => $buku->id,
+            'user_id' => $user->id, // Tambahkan user_id dari user yang login
+            // Tambahkan kolom lain jika diperlukan
+        ]);
+    
+        // Ambil semua bagian yang terkait dengan buku ini
+        $bagian = $buku->bagian;
+    
+        return response()->json([
+            'buku' => $buku,
+            'bagian' => $bagian,
         ], 200);
     }
 
@@ -80,15 +111,13 @@ class BukuController extends Controller
     {
         $buku = Buku::find($id);
 
-        if (!$buku)
-        {
+        if (!$buku) {
             return response([
                 'message' => 'Buku tidak ditemukan'
             ], 403);
         }
 
-        if($buku->user_id != auth()->user()->id)
-        {
+        if ($buku->user_id != auth()->user()->id) {
             return response([
                 'message' => 'Anda tidak berhak mengubah buku ini'
             ], 403);
@@ -102,8 +131,7 @@ class BukuController extends Controller
 
         $validatedData = $request->validate($firstData);
 
-        if ($request->file('cover'))
-        {
+        if ($request->file('cover')) {
             Storage::delete($buku->cover);
             $validatedData['cover'] = $request->file('cover')->store('covers');
         }
@@ -112,7 +140,6 @@ class BukuController extends Controller
             'message' => 'Buku berhasil diupdate',
             'buku' => Buku::where('id', $buku->id)->update($validatedData),
         ], 200);
-
     }
 
     /**

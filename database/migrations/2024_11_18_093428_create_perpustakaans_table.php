@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('perpustakaans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('buku_id');
+            $table->unsignedBigInteger('buku_id')->nullable(false);
+            $table->unsignedBigInteger('user_id')->nullable(false);
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('buku_id')->references('id')->on('bukus');
             $table->timestamps();
         });
     }

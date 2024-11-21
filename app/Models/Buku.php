@@ -10,7 +10,7 @@ class Buku extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['book_id'];
+    protected $guarded = ['buku_id'];
 
     public function user()
     {
@@ -20,5 +20,10 @@ class Buku extends Model
     public function bagian()
     {
         return $this->hasMany(Bagian::class);
+    }
+
+    public function perpustakaan()
+    {
+        return $this->hasMany(Perpustakaan::class);
     }
 }
