@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bagian;
 use App\Models\Buku;
+use App\Models\Perpustakaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -69,32 +70,34 @@ class BukuController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Buku $buku)
+    public function show($id)
     {
+        $buku = Buku::find($id);
+
         if (!$buku->id) {
             return response()->json([
-                'message' => 'Buku tidak valid'
+                'message' => 'Buku tidak valid',
             ], 400);
         }
         // Pastikan user sudah login
         $user = auth()->user();
-    
+
         if (!$user) {
             return response()->json([
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized',
             ], 401);
         }
-    
+
         // Tambahkan buku_id dan user_id ke dalam model Perpustakaan
-        \App\Models\Perpustakaan::create([
+        Perpustakaan::create([
             'buku_id' => $buku->id,
             'user_id' => $user->id, // Tambahkan user_id dari user yang login
             // Tambahkan kolom lain jika diperlukan
         ]);
-    
+
         // Ambil semua bagian yang terkait dengan buku ini
         $bagian = $buku->bagian;
-    
+
         return response()->json([
             'buku' => $buku,
             'bagian' => $bagian,
