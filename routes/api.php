@@ -4,7 +4,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BagianController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\PerpustakaanController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,7 +24,6 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/buku/{id}/add-to-library', [BukuController::class, 'addToLibrary']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::get('/perpustakaan', [PerpustakaanController::class, 'index']);
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('user/{id}/update-profile', [AuthController::class, 'updateProfile']);
@@ -46,4 +44,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/bagian/{id}', [BagianController::class, 'show']);
     Route::post('/buku/{buku_id}/bagian/{bagian_id}', [BagianController::class, 'update']);
     Route::delete('/buku/{buku_id}/bagian/{bagian}', [BagianController::class, 'destroy']);
+
+    Route::get('/perpustakaan', [PerpustakaanController::class, 'index']);
+    Route::post('/perpustakaan/tambah', [PerpustakaanController::class, 'store']);
+    Route::delete('/perpustakaan/{id}', [PerpustakaanController::class, 'destroy']);
 });
