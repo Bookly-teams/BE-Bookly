@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('bagians', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('buku_id');
+            $table->unsignedBigInteger('buku_id');
+            $table->foreign('buku_id')->references('id')->on('bukus');
             $table->string('judul_bagian');
             $table->longText('isi');
             $table->date('tanggal_publikasi');

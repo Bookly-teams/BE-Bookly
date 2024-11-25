@@ -24,6 +24,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user/profile', [UserController::class, 'showProfile']);
 
     Route::get('/buku', [BukuController::class, 'index']);
     Route::post('/buku', [BukuController::class, 'store']);
