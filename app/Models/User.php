@@ -4,12 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
-<<<<<<< HEAD
-=======
-
->>>>>>> 6de89285048dc809fa77af3558c89973c2e07806
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {

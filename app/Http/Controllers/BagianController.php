@@ -15,7 +15,7 @@ class BagianController extends Controller
     public function index()
     {
         return response()->json([
-            'bagians' => Bagian::orderBy('created_at', 'asc')->get() // Mengurutkan berdasarkan created_at secara descending
+            'bagians' => Bagian::orderBy('created_at', 'asc')->get(), // Mengurutkan berdasarkan created_at secara descending
         ], 200);
     }
 
@@ -44,7 +44,7 @@ class BagianController extends Controller
         // Pastikan user adalah pemilik buku
         if ($buku->user_id !== Auth::id()) {
             return response()->json([
-                'message' => 'Anda tidak memiliki izin untuk menambah bagian pada buku ini'
+                'message' => 'Anda tidak memiliki izin untuk menambah bagian pada buku ini',
             ], 403);
         }
 
@@ -75,7 +75,7 @@ class BagianController extends Controller
      */
     public function edit(Bagian $bagian)
     {
-    //
+        //
     }
 
     /**
@@ -100,16 +100,12 @@ class BagianController extends Controller
         // Pastikan user adalah pemilik buku
         if ($buku->user_id !== Auth::id()) {
             return response()->json([
-                'message' => 'Anda tidak memiliki izin untuk mengupdate bagian pada buku ini'
+                'message' => 'Anda tidak memiliki izin untuk mengupdate bagian pada buku ini',
             ], 403);
         }
 
         // Siapkan data yang akan diupdate (filter data yang ada)
-<<<<<<< HEAD
         $updateData = array_filter($validatedData, function ($value) {
-=======
-        $updateData = array_filter($validatedData, function($value) {
->>>>>>> 6de89285048dc809fa77af3558c89973c2e07806
             return $value !== null;
         });
 
@@ -144,7 +140,7 @@ class BagianController extends Controller
         // Pastikan user adalah pemilik buku
         if ($buku->user_id !== Auth::id()) {
             return response()->json([
-                'message' => 'Anda tidak memiliki izin untuk menghapus bagian pada buku ini'
+                'message' => 'Anda tidak memiliki izin untuk menghapus bagian pada buku ini',
             ], 403);
         }
 

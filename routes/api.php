@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BagianController;
 use App\Http\Controllers\BukuController;
 use App\Http\Controllers\PerpustakaanController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,7 +21,6 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-//Route::get('/perpustakaan', [PerpustakaanController::class, 'index']);
 Route::post('/buku/{id}/add-to-library', [BukuController::class, 'addToLibrary']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -40,7 +40,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::delete('/buku/{buku}', [BukuController::class, 'destroy']);
     Route::get('/buku/{buku_id}/bagian/{id_bagian}/baca', [BukuController::class, 'baca']);
 
-    Route::get('/buku/search', [BukuController::class, 'search']);
+    Route::post('/search', [BukuController::class, 'search']);
 
     Route::get('/buku/{buku_id}/bagian', [BagianController::class, 'index']);
     Route::post('/buku/{buku_id}/bagian', [BagianController::class, 'store']);
@@ -54,4 +54,3 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/perpustakaan/tambah', [PerpustakaanController::class, 'store']);
     Route::delete('/perpustakaan/{id}', [PerpustakaanController::class, 'destroy']);
 });
-

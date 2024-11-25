@@ -36,7 +36,7 @@ class BukuController extends Controller
             'bagian' => $buku,
         ], 200);
     }
-  
+
     /**
      * Show the form for creating a new resource.
      */
@@ -143,7 +143,7 @@ class BukuController extends Controller
         }
 
         $firstData = [
-            'cover' => 'required|image|file|max:2048',
+            'cover' => 'image|file|max:2048',
             'judul' => 'max:255|string',
             'deskripsi' => 'max:255|string',
         ];
