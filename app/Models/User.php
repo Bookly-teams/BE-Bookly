@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
+<<<<<<< HEAD
+=======
 
+>>>>>>> 6de89285048dc809fa77af3558c89973c2e07806
 
 class User extends Authenticatable
 {
@@ -18,7 +20,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $guarded = ['user_id'];
+    protected $guarded = ['id']; // 'id' adalah default primary key
 
     /**
      * The attributes that should be hidden for serialization.
@@ -38,4 +40,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Relasi dengan model Buku (satu user memiliki banyak buku).
+     */
+    public function buku()
+    {
+        return $this->hasMany(Buku::class);
+    }
 }

@@ -36,6 +36,7 @@ class BukuController extends Controller
             'bagian' => $buku,
         ], 200);
     }
+  
     /**
      * Show the form for creating a new resource.
      */

@@ -26,6 +26,9 @@ Route::post('/buku/{id}/add-to-library', [BukuController::class, 'addToLibrary']
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/user/profile', [UserController::class, 'showProfile']);
+
     Route::post('user/{id}/update-profile', [AuthController::class, 'updateProfile']);
 
     Route::get('/buku', [BukuController::class, 'index']);
@@ -45,7 +48,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/buku/{buku_id}/bagian/{bagian_id}', [BagianController::class, 'update']);
     Route::delete('/buku/{buku_id}/bagian/{bagian}', [BagianController::class, 'destroy']);
 
+    Route::post('user/{id}/update-profile', [AuthController::class, 'updateProfile']);
+
     Route::get('/perpustakaan', [PerpustakaanController::class, 'index']);
     Route::post('/perpustakaan/tambah', [PerpustakaanController::class, 'store']);
     Route::delete('/perpustakaan/{id}', [PerpustakaanController::class, 'destroy']);
 });
+
