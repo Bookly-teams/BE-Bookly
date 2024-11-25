@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Buku;
 use App\Models\Perpustakaan;
 use Illuminate\Http\Request;
 
@@ -12,54 +13,73 @@ class PerpustakaanController extends Controller
      */
     public function index()
     {
-        //
+        // Mengambil ID user dari request
+        $userId = auth()->id();
+
+        // Mengambil semua buku yang telah dibaca oleh user, diurutkan berdasarkan waktu terakhir dibaca
+        $books = Buku::where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get(['judul', 'cover']);
+
+        // Menghitung total histori yang telah dibaca oleh user
+        $totalReadHistory = $books->count();
+
+        // Mengembalikan response dengan data buku dan total histori
+        return response([
+            'message' => 'Data buku berhasil diambil',
+            'data' => $books,
+            'total_read_history' => $totalReadHistory,
+        ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'buku_id' => 'required|exists:bukus,id',
+        ]);
+
+        $buku_id = $request->buku_id;
+
+        // Cek apakah buku sudah pernah ditambahkan sebelumnya
+        $existingRecord = Perpustakaan::where('buku_id', $buku_id)
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if ($existingRecord) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Buku sudah ada di perpustakaan Anda',
+            ], 400);
+        }
+
+        $perpustakaan = Perpustakaan::create([
+            'buku_id' => $buku_id,
+            'user_id' => auth()->id(),
+        ]);
+
+        return response()->json([
+            'message' => 'Buku berhasil ditambahkan',
+            'data' => $perpustakaan,
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Perpustakaan $perpustakaan)
+    public function destroy($id)
     {
-        //
-    }
+        $perpustakaan = Perpustakaan::where('buku_id', $id)
+            ->where('user_id', auth()->id())
+            ->first();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Perpustakaan $perpustakaan)
-    {
-        //
-    }
+        if (!$perpustakaan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Buku tidak ditemukan di perpustakaan Anda',
+            ], 404);
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Perpustakaan $perpustakaan)
-    {
-        //
-    }
+        $perpustakaan->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Perpustakaan $perpustakaan)
-    {
-        //
+        return response()->json([
+            'message' => 'Buku berhasil dihapus dari perpustakaan',
+        ], 200);
     }
 }

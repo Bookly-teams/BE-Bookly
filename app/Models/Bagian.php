@@ -13,10 +13,6 @@ class Bagian extends Model
 
     public function buku()
     {
-<<<<<<< HEAD
         return $this->belongsTo(Buku::class, 'buku_id', 'id');
-=======
-        return $this->belongsTo(Buku::class);
->>>>>>> 6de89285048dc809fa77af3558c89973c2e07806
     }
 }
