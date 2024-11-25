@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Buku;
+<<<<<<< HEAD
 use App\Models\Bagian;
+=======
+use App\Models\Bagian; 
+>>>>>>> 6de89285048dc809fa77af3558c89973c2e07806
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +19,7 @@ class BukuController extends Controller
      * Display a listing of the resource.
      */
     public function index()
+<<<<<<< HEAD
     {
         // Ambil data dari model Bagian dengan relasi buku dan user
         $bagian = Bagian::with(['buku' => function ($query) {
@@ -40,6 +45,33 @@ class BukuController extends Controller
             'bagian' => $bagian
         ], 200);
     }
+=======
+{
+    // Ambil data dari model Bagian dengan relasi buku dan user
+    $bagian = Bagian::with(['buku' => function($query) {
+        $query->select('id', 'cover', 'judul', 'deskripsi', 'user_id')
+              ->with(['user' => function($query) {
+                  $query->select('id', 'nama_pengguna');
+              }]);
+    }])
+    ->select('buku_id', DB::raw('COUNT(*) as total_bagian'))
+    ->groupBy('buku_id')
+    ->get()
+    ->map(function($item) {
+        return [
+            'cover' => $item->buku->cover,
+            'judul' => $item->buku->judul,
+            'deskripsi' => $item->buku->deskripsi,
+            'nama_pengguna' => $item->buku->user->nama_pengguna,
+            'total_bagian' => $item->total_bagian
+        ];
+    });
+
+    return response()->json([
+        'bagian' => $bagian
+    ], 200);
+}
+>>>>>>> 6de89285048dc809fa77af3558c89973c2e07806
     /**
      * Show the form for creating a new resource.
      */

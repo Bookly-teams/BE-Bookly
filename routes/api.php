@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/buku/search', [BukuController::class, 'search']);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -31,7 +33,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/buku/{id}', [BukuController::class, 'show']);
     Route::put('/buku/{buku}', [BukuController::class, 'update']);
     Route::delete('/buku/{buku}', [BukuController::class, 'destroy']);
-
+  
     Route::get('/buku/{buku_id}/bagian', [BagianController::class, 'index']);
     Route::post('/buku/{buku_id}/bagian', [BagianController::class, 'store']);
     Route::get('/bagian/{id}', [BagianController::class, 'show']);

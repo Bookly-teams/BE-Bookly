@@ -75,7 +75,7 @@ class BagianController extends Controller
      */
     public function edit(Bagian $bagian)
     {
-        //
+    //
     }
 
     /**
@@ -105,7 +105,11 @@ class BagianController extends Controller
         }
 
         // Siapkan data yang akan diupdate (filter data yang ada)
+<<<<<<< HEAD
         $updateData = array_filter($validatedData, function ($value) {
+=======
+        $updateData = array_filter($validatedData, function($value) {
+>>>>>>> 6de89285048dc809fa77af3558c89973c2e07806
             return $value !== null;
         });
 
