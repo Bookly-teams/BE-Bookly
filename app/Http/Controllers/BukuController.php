@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Bagian;
 use App\Models\Buku;
 use App\Models\Perpustakaan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -62,9 +63,15 @@ class BukuController extends Controller
 
         $validatedData['user_id'] = Auth::user()->id;
 
+        $buku = Buku::create($validatedData);
+
+        $user = Auth::user();
+        $user->karya++;
+        $user->save();
+
         return response([
             'message' => 'Buku berhasil ditambahkan',
-            'buku' => Buku::create($validatedData),
+            'buku' => $buku,
         ], 200);
     }
 
@@ -210,6 +217,11 @@ class BukuController extends Controller
 
         // Hapus buku
         $book->delete();
+
+        // Kurangi kolom karya pada model user
+        $user = Auth::user();
+        $user->karya--;
+        $user->save();
 
         return response()->json([
             'message' => 'Buku berhasil dihapus',
