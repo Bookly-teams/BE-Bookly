@@ -52,14 +52,12 @@ class BukuController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'cover' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'cover' => 'required',
             'judul' => 'required|max:255|string',
             'deskripsi' => 'required|string',
         ]);
 
-        if ($request->file('cover')) {
-            $validatedData['cover'] = $request->file('cover')->store('cover');
-        }
+        $cover = $this->saveImage($request->cover, 'bukus');
 
         $validatedData['user_id'] = Auth::user()->id;
 
@@ -255,6 +253,43 @@ class BukuController extends Controller
             'judul_buku' => $buku->judul,
             'judul_bagian' => $bagian->judul_bagian,
             'isi' => $bagian->isi, // Pastikan 'isi' adalah nama kolom di tabel Bagian
+        ], 200);
+    }
+
+    public function lihatBukuUser(Request $request)
+    {
+        // Pastikan user sudah login
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        // Ambil buku yang ditulis oleh user, diurutkan dari yang terbaru
+        $buku = Buku::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Inisialisasi array data
+        $data = [];
+
+        // Looping buku yang di ambil
+        foreach ($buku as $item) {
+            // Ambil total bagian dari buku
+            $total_bagian = Bagian::where('buku_id', $item->id)->count();
+
+            // Masukkan data ke dalam array
+            $data[] = [
+                'cover' => $item->cover,
+                'judul' => $item->judul,
+                'totalBagian' => $total_bagian,
+            ];
+        }
+
+        return response()->json([
+            'bukus' => $data,
         ], 200);
     }
 }

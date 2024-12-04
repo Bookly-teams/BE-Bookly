@@ -26,4 +26,5 @@ class Buku extends Model
     {
         return $this->hasMany(Perpustakaan::class);
     }
+
 }
